@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Juego de la Cuenta Regresiva</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <main class="app">
+
+    <!-- PANTALLA DE CONFIGURACIÓN -->
+    <section id="setup-screen" class="screen">
+      <h1>Cuenta Regresiva</h1>
+      <p class="subtitle">Encuentra los números en orden descendente antes de que se acabe el tiempo.</p>
+
+      <div class="field">
+        <label for="grid-size">Tamaño del cuadro (N x N)</label>
+        <input type="number" id="grid-size" min="2" max="12" placeholder="Ej: 6" inputmode="numeric">
+      </div>
+
+      <div class="field">
+        <label for="timer-seconds">Tiempo (segundos)</label>
+        <input type="number" id="timer-seconds" min="1" placeholder="Ej: 35" inputmode="numeric">
+      </div>
+
+      <p id="setup-error" class="error" hidden></p>
+
+      <button id="start-btn" class="btn" hidden>Empezar</button>
+    </section>
+
+    <!-- PANTALLA DE CONTEO -->
+    <section id="countdown-screen" class="screen" hidden>
+      <div id="countdown-number" class="countdown">3</div>
+    </section>
+
+    <!-- PANTALLA DE JUEGO -->
+    <section id="game-screen" class="screen" hidden>
+      <div class="game-header">
+        <div class="info">
+          <span class="info-label">Tiempo</span>
+          <span id="time-left" class="info-value">00</span>
+        </div>
+        <div class="info">
+          <span class="info-label">Marcados</span>
+          <span id="found-count" class="info-value">0</span>
+        </div>
+      </div>
+
+      <div id="grid" class="grid"></div>
+
+      <p class="hint">Toca un número para marcarlo/desmarcarlo. Busca en orden descendente: N² → N² - 1 → ... → 1.</p>
+
+      <button id="stop-btn" class="btn btn-secondary">Terminar</button>
+    </section>
+
+    <!-- PANTALLA DE RESULTADOS -->
+    <section id="result-screen" class="screen" hidden>
+      <h2>¡Tiempo terminado!</h2>
+      <p>Revisa honestamente hasta qué número llegaste.</p>
+      <p class="result-stat">Números marcados: <span id="result-count">0</span></p>
+      <p class="result-list-label">Números que marcaste:</p>
+      <div id="result-list" class="result-list"></div>
+      <button id="restart-btn" class="btn">Jugar de nuevo</button>
+    </section>
+
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
