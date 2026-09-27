@@ -15,6 +15,7 @@ const timeLeftEl = document.getElementById('time-left');
 const foundCountEl = document.getElementById('found-count');
 const gridEl = document.getElementById('grid');
 const stopBtn = document.getElementById('stop-btn');
+const gameHintEl = document.getElementById('game-hint');
 
 const resultCountEl = document.getElementById('result-count');
 const resultListEl = document.getElementById('result-list');
@@ -25,7 +26,18 @@ let gridSize = 0;
 let totalSeconds = 0;
 let secondsLeft = 0;
 let timerInterval = null;
-let foundNumbers = new Set();
+let difficulty = 'medium';
+
+// Orden de selección: preserva el orden en que el jugador marcó los números.
+let selectionOrder = [];
+// Mapa número -> color asignado (solo nivel fácil).
+let easyColorMap = new Map();
+
+const HINTS = {
+  easy: 'Cada número marcado se pinta de un color único. Puedes desmarcarlo.',
+  medium: 'Toca un número para marcarlo/desmarcarlo. Busca en orden descendente: N² → N² - 1 → ... → 1.',
+  hard: 'Las casillas parpadean al tocarlas pero NO quedan marcadas. Recuerda el orden en que vas.'
+};
 
 // ---------- Utilidades ----------
 function showScreen(screen) {
@@ -40,6 +52,18 @@ function shuffle(array) {
     [array[i], array[j]] = [array[j], array[i]];
   }
   return array;
+}
+
+function randomRGB() {
+  const r = Math.floor(Math.random() * 256);
+  const g = Math.floor(Math.random() * 256);
+  const b = Math.floor(Math.random() * 256);
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
+function getSelectedDifficulty() {
+  const checked = document.querySelector('input[name="difficulty"]:checked');
+  return checked ? checked.value : 'medium';
 }
 
 function checkInputs() {
@@ -72,6 +96,7 @@ startBtn.addEventListener('click', () => {
 
   gridSize = n;
   totalSeconds = t;
+  difficulty = getSelectedDifficulty();
   runCountdown();
 });
 
@@ -93,8 +118,16 @@ function runCountdown() {
 }
 
 function startGame() {
-  foundNumbers = new Set();
+  selectionOrder = [];
+  easyColorMap = new Map();
   secondsLeft = totalSeconds;
+
+  // Aplica clase al body para que el CSS del nivel difícil tenga efecto.
+  document.body.classList.remove('difficulty-easy', 'difficulty-medium', 'difficulty-hard');
+  document.body.classList.add(`difficulty-${difficulty}`);
+
+  gameHintEl.textContent = HINTS[difficulty];
+
   buildGrid();
   updateFoundCount();
   updateTimeDisplay();
@@ -128,18 +161,54 @@ function buildGrid() {
 }
 
 function toggleCell(cell, num) {
-  if (foundNumbers.has(num)) {
-    foundNumbers.delete(num);
-    cell.classList.remove('found');
+  const idx = selectionOrder.indexOf(num);
+  if (idx !== -1) {
+    // Desmarcar
+    selectionOrder.splice(idx, 1);
+    if (difficulty === 'easy') {
+      cell.style.backgroundColor = '';
+      cell.style.color = '';
+      easyColorMap.delete(num);
+    } else if (difficulty === 'medium') {
+      cell.classList.remove('found');
+    }
+    // Nivel difícil: no hay clase persistente que quitar.
   } else {
-    foundNumbers.add(num);
-    cell.classList.add('found');
+    // Marcar
+    selectionOrder.push(num);
+    if (difficulty === 'easy') {
+      const color = randomRGB();
+      easyColorMap.set(num, color);
+      cell.style.backgroundColor = color;
+      // Asegura contraste: texto oscuro sobre fondo claro, claro sobre oscuro.
+      cell.style.color = isLight(color) ? '#000' : '#fff';
+    } else if (difficulty === 'medium') {
+      cell.classList.add('found');
+    } else if (difficulty === 'hard') {
+      // Dispara el efecto de presión y lo limpia al terminar.
+      cell.classList.remove('press-effect');
+      // Forzar reflow para reiniciar la animación si se presiona rápido.
+      void cell.offsetWidth;
+      cell.classList.add('press-effect');
+      setTimeout(() => cell.classList.remove('press-effect'), 850);
+    }
   }
   updateFoundCount();
 }
 
+function isLight(rgbStr) {
+  const m = rgbStr.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+  if (!m) return true;
+  const [r, g, b] = [+m[1], +m[2], +m[3]].map(v => {
+    v /= 255;
+    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  });
+  const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  return luminance > 0.5;
+}
+
 function updateFoundCount() {
-  foundCountEl.textContent = foundNumbers.size;
+  foundCountEl.textContent = selectionOrder.length;
 }
 
 function updateTimeDisplay() {
@@ -157,11 +226,11 @@ function endGame() {
 }
 
 function showResults() {
-  resultCountEl.textContent = foundNumbers.size;
+  resultCountEl.textContent = selectionOrder.length;
   resultListEl.innerHTML = '';
 
-  const sorted = Array.from(foundNumbers).sort((a, b) => b - a);
-  sorted.forEach(num => {
+  // Muestra los números en el orden en que el jugador los seleccionó.
+  selectionOrder.forEach(num => {
     const chip = document.createElement('div');
     chip.className = 'result-chip';
     chip.textContent = num;
@@ -176,5 +245,6 @@ restartBtn.addEventListener('click', () => {
   timerSecondsInput.value = '';
   startBtn.hidden = true;
   setupError.hidden = true;
+  document.body.classList.remove('difficulty-easy', 'difficulty-medium', 'difficulty-hard');
   showScreen(setupScreen);
 });

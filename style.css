@@ -84,6 +84,28 @@ h1 {
   background: var(--light-gray);
 }
 
+.radio-group {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.radio-label input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
 .error {
   color: var(--black);
   background: var(--light-gray);
@@ -183,6 +205,34 @@ h1 {
   color: var(--white);
   text-decoration: line-through;
   opacity: 0.4;
+}
+
+/* Nivel difícil: las casillas NO quedan marcadas visualmente */
+body.difficulty-hard .cell.found {
+  background: var(--white);
+  color: var(--black);
+  text-decoration: none;
+  opacity: 1;
+}
+
+/* Nivel difícil: efecto de presión de 0.85s al tocar */
+@keyframes press-flash {
+  0% {
+    transform: scale(1);
+    background: var(--white);
+  }
+  50% {
+    transform: scale(0.92);
+    background: var(--light-gray);
+  }
+  100% {
+    transform: scale(1);
+    background: var(--white);
+  }
+}
+
+.cell.press-effect {
+  animation: press-flash 0.85s ease-out;
 }
 
 .hint {

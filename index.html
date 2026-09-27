@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Juego de la Cuenta Regresiva</title>
+<title>Conte</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -23,6 +23,15 @@
       <div class="field">
         <label for="timer-seconds">Tiempo (segundos)</label>
         <input type="number" id="timer-seconds" min="1" placeholder="Ej: 35" inputmode="numeric">
+      </div>
+
+      <div class="field">
+        <label>Dificultad</label>
+        <div class="radio-group">
+          <label class="radio-label"><input type="radio" name="difficulty" value="easy"> Fácil</label>
+          <label class="radio-label"><input type="radio" name="difficulty" value="medium" checked> Medio</label>
+          <label class="radio-label"><input type="radio" name="difficulty" value="hard"> Difícil</label>
+        </div>
       </div>
 
       <p id="setup-error" class="error" hidden></p>
@@ -50,7 +59,7 @@
 
       <div id="grid" class="grid"></div>
 
-      <p class="hint">Toca un número para marcarlo/desmarcarlo. Busca en orden descendente: N² → N² - 1 → ... → 1.</p>
+      <p class="hint" id="game-hint">Toca un número para marcarlo/desmarcarlo. Busca en orden descendente: N² → N² - 1 → ... → 1.</p>
 
       <button id="stop-btn" class="btn btn-secondary">Terminar</button>
     </section>
